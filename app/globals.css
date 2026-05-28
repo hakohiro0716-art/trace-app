@@ -1,0 +1,127 @@
+@import "tailwindcss";
+
+:root {
+  --trace-bg: #0b1220; /* navy */
+  --trace-fg: #e7eefc;
+  --trace-muted: #a6b3c9;
+  --trace-card: rgba(255, 255, 255, 0.06);
+  --trace-card-border: rgba(255, 255, 255, 0.10);
+  --trace-shadow: rgba(0, 0, 0, 0.45);
+  --trace-emerald: #1fd2a6;
+  --trace-forest: #0b3d2e;
+  --trace-radius: 28px;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-background: var(--trace-bg);
+  --color-foreground: var(--trace-fg);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--trace-bg);
+  color: var(--trace-fg);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
+    Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+/* Prevent iOS overscroll white flash on dark hero */
+html,
+body {
+  background-color: #0b1220;
+}
+
+/* Subtle iOS-like background depth */
+.trace-bg {
+  position: relative;
+  isolation: isolate;
+}
+.trace-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(900px 520px at 12% 10%, rgba(31, 210, 166, 0.18), transparent 60%),
+    radial-gradient(820px 520px at 88% 18%, rgba(11, 61, 46, 0.35), transparent 58%),
+    radial-gradient(900px 700px at 35% 82%, rgba(15, 23, 42, 0.80), transparent 65%),
+    linear-gradient(180deg, #07101e 0%, #0b1220 45%, #070e1a 100%);
+}
+.trace-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.06;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.7) 1px, transparent 0);
+  background-size: 28px 28px;
+  background-position: 2px 6px;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+@keyframes trace-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes trace-pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 18px 55px rgba(0, 0, 0, 0.35);
+  }
+  50% {
+    box-shadow: 0 22px 65px rgba(0, 0, 0, 0.45);
+  }
+}
+
+/* View Transition polish */
+::view-transition-old(app-shell),
+::view-transition-new(app-shell) {
+  animation-duration: 240ms;
+  animation-timing-function: cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+::view-transition-old(app-shell) {
+  animation-name: trace-vt-out;
+}
+::view-transition-new(app-shell) {
+  animation-name: trace-vt-in;
+}
+@keyframes trace-vt-out {
+  to {
+    opacity: 0;
+    filter: blur(2px);
+    transform: translateY(6px) scale(0.995);
+  }
+}
+@keyframes trace-vt-in {
+  from {
+    opacity: 0;
+    filter: blur(3px);
+    transform: translateY(10px) scale(0.995);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}
