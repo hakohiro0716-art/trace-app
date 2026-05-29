@@ -1,4 +1,4 @@
-import { TabShell } from "../_components/TabShell";
+import { TabShell } from "@/app/components/layout/TabShell";
 
 export default function ProfilePage() {
   return (

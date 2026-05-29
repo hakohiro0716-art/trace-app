@@ -1,10 +1,12 @@
+import Link from "next/link";
 import { BookmarkIcon } from "./icons";
 
 function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
 
-export function NowReadingCard(props: {
+export function ReadingCard(props: {
+  href?: string;
   title: string;
   subtitle: string;
   statusLabel: string;
@@ -67,20 +69,39 @@ export function NowReadingCard(props: {
               />
             </div>
 
-            <button
-              className={cn(
-                "mt-5 w-full",
-                "rounded-[18px] border border-white/12 bg-white/6 px-4 py-3",
-                "text-[13px] font-medium text-white/90",
-                "shadow-[0_10px_30px_rgba(0,0,0,0.20)]",
-                "transition-transform duration-200 active:scale-[0.985]",
-              )}
-            >
-              <span className="inline-flex items-center justify-center gap-2">
-                <BookmarkIcon className="text-white/80" />
-                続きを読む
-              </span>
-            </button>
+            {props.href ? (
+              <Link
+                href={props.href}
+                className={cn(
+                  "mt-5 block w-full",
+                  "rounded-[18px] border border-white/12 bg-white/6 px-4 py-3",
+                  "text-center text-[13px] font-medium text-white/90",
+                  "shadow-[0_10px_30px_rgba(0,0,0,0.20)]",
+                  "transition-transform duration-200 active:scale-[0.985]",
+                )}
+              >
+                <span className="inline-flex items-center justify-center gap-2">
+                  <BookmarkIcon className="text-white/80" />
+                  続きを読む
+                </span>
+              </Link>
+            ) : (
+              <button
+                type="button"
+                className={cn(
+                  "mt-5 w-full",
+                  "rounded-[18px] border border-white/12 bg-white/6 px-4 py-3",
+                  "text-[13px] font-medium text-white/90",
+                  "shadow-[0_10px_30px_rgba(0,0,0,0.20)]",
+                  "transition-transform duration-200 active:scale-[0.985]",
+                )}
+              >
+                <span className="inline-flex items-center justify-center gap-2">
+                  <BookmarkIcon className="text-white/80" />
+                  続きを読む
+                </span>
+              </button>
+            )}
           </div>
         </div>
       </div>

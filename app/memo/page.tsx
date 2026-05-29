@@ -1,43 +1,44 @@
-import { TabShell } from "../_components/TabShell";
+import Link from "next/link";
+import { TabShell } from "@/app/components/layout/TabShell";
+import { ThoughtLogListItem } from "@/app/components/memo/ThoughtLogListItem";
+import { getAllThoughtLogs } from "@/app/lib/thought-log";
+
+function cn(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(" ");
+}
 
 export default function MemoPage() {
+  const logs = getAllThoughtLogs();
+
   return (
-    <TabShell title="Memo" eyebrow="TRACE">
+    <TabShell title="思考ログ" eyebrow="TRACE">
       <div className="space-y-3">
-        <div className="rounded-[var(--trace-radius)] border border-white/10 bg-white/[0.06] p-5 backdrop-blur-2xl">
-          <p className="text-[13px] text-white/70">
-            読書メモを「一文」から積み上げる画面を予定しています。
+        <p className="text-[13px] leading-relaxed text-white/65">
+          読書から生まれた考えを、未来の自分のために静かに残します。
+        </p>
+
+        <Link
+          href="/memo/new"
+          className={cn(
+            "block rounded-[22px] border border-white/10 bg-white/[0.06] p-5 backdrop-blur-2xl",
+            "transition-transform duration-200 active:scale-[0.985]",
+          )}
+        >
+          <p className="text-[14px] font-semibold">思考ログを残す</p>
+          <p className="mt-1 text-[12px] text-white/55">
+            気づき・引用・タグを記録する
           </p>
-          <div className="mt-4">
-            <button className="w-full rounded-[22px] border border-white/10 bg-white/[0.05] p-4 text-left transition-transform duration-200 active:scale-[0.985]">
-              <p className="text-[14px] font-semibold">新しいメモ</p>
-              <p className="mt-1 text-[12px] text-white/55">
-                引用・気づき・行動を書き留める
-              </p>
-            </button>
-          </div>
-        </div>
+        </Link>
 
         <div className="rounded-[var(--trace-radius)] border border-white/10 bg-white/[0.06] p-5 backdrop-blur-2xl">
-          <p className="text-[11px] tracking-[0.22em] text-white/55">
-            RECENT
-          </p>
+          <p className="text-[11px] tracking-[0.22em] text-white/55">RECENT</p>
           <div className="mt-4 space-y-2">
-            {["「自分の課題は、自分の勇気で引き受ける」", "集中は環境で設計できる"].map(
-              (t) => (
-                <div
-                  key={t}
-                  className="rounded-[18px] border border-white/10 bg-white/[0.05] px-4 py-3"
-                >
-                  <p className="text-[13px] text-white/70">{t}</p>
-                  <p className="mt-1 text-[11px] text-white/40">5月</p>
-                </div>
-              ),
-            )}
+            {logs.map((log) => (
+              <ThoughtLogListItem key={log.id} log={log} variant="dark" />
+            ))}
           </div>
         </div>
       </div>
     </TabShell>
   );
 }
-

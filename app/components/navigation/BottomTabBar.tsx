@@ -153,7 +153,7 @@ const tabs: Tab[] = [
   },
 ];
 
-export function BottomNav() {
+export function BottomTabBar() {
   const pathname = usePathname() ?? "/";
 
   return (

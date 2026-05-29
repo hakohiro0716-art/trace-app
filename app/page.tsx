@@ -1,22 +1,23 @@
-import { BottomNav } from "./_components/BottomNav";
-import { HeroBackground } from "./_components/home/HeroBackground";
-import { HomeHeader } from "./_components/home/HomeHeader";
-import { LifeStackBanner } from "./_components/home/LifeStackBanner";
-import { NowReadingCard } from "./_components/home/NowReadingCard";
-import { StatsRow } from "./_components/home/StatsRow";
-import { ThoughtLogCard } from "./_components/home/ThoughtLogCard";
+import { HeroBackground } from "@/app/components/home/HeroBackground";
+import { HomeHeader } from "@/app/components/home/HomeHeader";
+import { LifeStackBanner } from "@/app/components/home/LifeStackBanner";
+import { ReadingCard } from "@/app/components/home/ReadingCard";
+import { StatsRow } from "@/app/components/home/StatsRow";
+import { ThoughtLogCard } from "@/app/components/home/ThoughtLogCard";
+import { BottomTabBar } from "@/app/components/navigation/BottomTabBar";
+import { defaultBookId } from "@/app/lib/books";
 
 export default function Home() {
   return (
     <div className="min-h-screen">
-      {/* HERO */}
       <div className="relative">
         <HeroBackground />
         <div className="relative pb-6">
           <div className="mx-auto max-w-md">
             <HomeHeader />
             <div className="mt-7 animate-[trace-fade-up_700ms_cubic-bezier(0.2,0.9,0.2,1)_both]">
-              <NowReadingCard
+              <ReadingCard
+                href={`/books/${defaultBookId}`}
                 title="エッセンシャル思考"
                 subtitle="最少の時間で成果を最大にする"
                 statusLabel="読書中"
@@ -28,7 +29,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* LIGHT SURFACE */}
       <div className="bg-[linear-gradient(180deg,rgba(246,242,234,0.92)_0%,#F6F2EA_100%)]">
         <div className="mx-auto max-w-md space-y-5 pt-5 pb-28">
           <ThoughtLogCard
@@ -51,7 +51,7 @@ export default function Home() {
         </div>
       </div>
 
-      <BottomNav />
+      <BottomTabBar />
     </div>
   );
 }

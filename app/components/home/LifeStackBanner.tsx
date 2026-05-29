@@ -22,7 +22,6 @@ export function LifeStackBanner() {
           </p>
         </div>
 
-        {/* stack silhouette */}
         <div className="absolute bottom-0 right-0 h-24 w-40 opacity-70">
           <div className="absolute bottom-4 right-7 h-5 w-24 rounded-[12px] bg-white/18" />
           <div className="absolute bottom-7 right-6 h-6 w-28 rounded-[12px] bg-white/14" />

@@ -4,10 +4,8 @@ export function HeroBackground() {
       <div className="absolute inset-0 bg-[radial-gradient(900px_540px_at_20%_0%,rgba(214,228,222,0.30),transparent_55%),radial-gradient(820px_560px_at_90%_25%,rgba(20,94,79,0.40),transparent_55%),linear-gradient(180deg,#2a6a69_0%,#1e5a59_35%,#163e45_72%,#12333e_100%)]" />
       <div className="absolute inset-0 opacity-[0.18] [background-image:radial-gradient(rgba(255,255,255,0.9)_1px,transparent_0)] [background-size:30px_30px] [background-position:2px_6px] mix-blend-overlay" />
 
-      {/* soft vignette */}
       <div className="absolute inset-0 bg-[radial-gradient(900px_600px_at_50%_20%,transparent_35%,rgba(0,0,0,0.38)_100%)]" />
 
-      {/* right-side botanical silhouette (simple inline SVG) */}
       <svg
         className="absolute -right-6 top-10 h-[360px] w-[220px] opacity-60"
         viewBox="0 0 220 360"
