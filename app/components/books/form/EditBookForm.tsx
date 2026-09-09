@@ -30,11 +30,13 @@ export function EditBookForm({
   const [coverFile, setCoverFile] = useState<File | null>(null);
 
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const canSave =
     draft.title.trim().length > 0 &&
     draft.author.trim().length > 0 &&
-    !saving;
+    !saving &&
+    !deleting;
 
   const handleSave = async () => {
     if (!canSave) return;
@@ -89,6 +91,36 @@ export function EditBookForm({
       router.refresh();
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    const confirmed = window.confirm(
+      `「${draft.title}」を削除しますか？\n\nこの操作は元に戻せません。`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setDeleting(true);
+
+    try {
+      const { error } = await supabase
+        .from("books")
+        .delete()
+        .eq("id", bookId);
+
+      if (error) {
+        console.error(error);
+        alert("本の削除に失敗しました");
+        return;
+      }
+
+      router.push("/library");
+      router.refresh();
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -208,6 +240,21 @@ export function EditBookForm({
             rows={4}
           />
         </FormSection>
+
+        <div className="pt-3">
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={saving || deleting}
+            className="flex h-12 w-full items-center justify-center rounded-[18px] border border-red-400/20 bg-red-400/[0.08] text-[14px] font-medium text-red-200 transition-transform duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {deleting ? "削除中..." : "この本を削除"}
+          </button>
+
+          <p className="mt-2 text-center text-[11px] text-white/35">
+            削除した本は元に戻せません
+          </p>
+        </div>
       </div>
 
       <SaveBookButton

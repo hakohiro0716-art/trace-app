@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
@@ -19,7 +21,10 @@ function TinyBars() {
         <div
           key={i}
           className="w-2 rounded-full bg-[#9eb8ad]"
-          style={{ height: `${h * 6}px`, opacity: 0.55 + i * 0.08 }}
+          style={{
+            height: `${h * 6}px`,
+            opacity: 0.55 + i * 0.08,
+          }}
         />
       ))}
     </div>
@@ -42,6 +47,7 @@ function StatCard(props: {
   suffix: string;
   footer: string;
   art: React.ReactNode;
+  href: string;
 }) {
   return (
     <div
@@ -50,52 +56,73 @@ function StatCard(props: {
         "shadow-[0_14px_34px_rgba(0,0,0,0.07)]",
       )}
     >
-      <p className="text-[12px] font-semibold text-slate-700">{props.label}</p>
+      <p className="text-[12px] font-semibold text-slate-700">
+        {props.label}
+      </p>
+
       <div className="mt-3 flex items-end justify-between">
         <div>
           <p className="text-[28px] font-semibold tracking-[-0.03em] text-slate-900">
             {props.value}
+
             <span className="ml-1 text-[14px] font-medium text-slate-700">
               {props.suffix}
             </span>
           </p>
         </div>
+
         <div className="opacity-90">{props.art}</div>
       </div>
-      <button className="mt-4 text-[12px] text-slate-600 hover:text-slate-800 transition-colors">
+
+      <Link
+        href={props.href}
+        className="mt-4 inline-block text-[12px] text-slate-600 transition-colors hover:text-slate-800"
+      >
         {props.footer} ›
-      </button>
+      </Link>
     </div>
   );
 }
 
-export function StatsRow() {
+export function StatsRow({
+  backlogCount,
+  finishedCount,
+  thoughtLogCount,
+}: {
+  backlogCount: number;
+  finishedCount: number;
+  thoughtLogCount: number;
+}) {
   return (
     <section className="px-5">
       <div className="grid grid-cols-3 gap-3">
         <StatCard
           label="積読"
-          value="12"
+          value={String(backlogCount)}
           suffix="冊"
           footer="一覧を見る"
+          href="/library?status=backlog"
           art={<TinyStackArt />}
         />
+
         <StatCard
           label="読了した本"
-          value="23"
+          value={String(finishedCount)}
           suffix="冊"
           footer="読み返す"
+          href="/library?status=finished"
           art={<TinyBars />}
         />
+
         <StatCard
           label="思考ログ"
-          value="87"
+          value={String(thoughtLogCount)}
           suffix="件"
           footer="振り返る"
+          href="/memo"
           art={<TinyMemoArt />}
         />
       </div>
     </section>
   );
 }
-

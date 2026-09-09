@@ -1,13 +1,18 @@
 "use client";
 
-import type { BookDetail } from "@/app/lib/books";
-
 function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
 
+export type TargetBook = {
+  id: string;
+  title: string;
+  author: string;
+  cover_url: string | null;
+};
+
 export function TargetBookCard(props: {
-  book: BookDetail;
+  book: TargetBook;
   onChange: () => void;
 }) {
   const { book } = props;
@@ -22,25 +27,37 @@ export function TargetBookCard(props: {
       <div
         className={cn(
           "relative h-[88px] w-[62px] shrink-0 overflow-hidden rounded-[14px]",
-          "bg-[linear-gradient(180deg,#f5f1e8_0%,#efe8dc_45%,#e7dfd2_100%)]",
           "shadow-[0_10px_24px_rgba(0,0,0,0.14)]",
         )}
       >
-        <div className="absolute inset-0 bg-[radial-gradient(80px_60px_at_30%_20%,rgba(20,94,79,0.18),transparent_60%)]" />
-        <div className="absolute left-2 top-2 right-2">
-          <p className="line-clamp-3 text-[8px] font-semibold leading-tight text-slate-900">
-            {book.title}
-          </p>
-        </div>
+        {book.cover_url ? (
+          <img
+            src={book.cover_url}
+            alt={book.title}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <div className="relative h-full w-full bg-[linear-gradient(180deg,#f5f1e8_0%,#efe8dc_45%,#e7dfd2_100%)]">
+            <div className="absolute inset-0 bg-[radial-gradient(80px_60px_at_30%_20%,rgba(20,94,79,0.18),transparent_60%)]" />
+
+            <div className="absolute left-2 right-2 top-2">
+              <p className="line-clamp-3 text-[8px] font-semibold leading-tight text-slate-900">
+                {book.title}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="min-w-0 flex-1">
         <p className="text-[11px] font-medium tracking-wide text-slate-500">
           対象の本
         </p>
+
         <p className="mt-1 truncate text-[15px] font-semibold tracking-[-0.01em] text-slate-900">
           {book.title}
         </p>
+
         <p className="mt-0.5 truncate text-[12px] text-slate-600">
           {book.author}
         </p>
