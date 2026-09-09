@@ -4,10 +4,14 @@ import { TabShell } from "@/app/components/layout/TabShell";
 import { supabase } from "@/app/lib/supabase";
 
 export default async function LibraryPage() {
-  const { data: books } = await supabase
+  const { data: books, error } = await supabase
     .from("books")
     .select("*")
     .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("本一覧の取得に失敗しました:", error);
+  }
 
   const mappedBooks =
     books?.map((book) => ({
@@ -15,6 +19,7 @@ export default async function LibraryPage() {
       title: book.title,
       subtitle: "",
       author: book.author,
+      cover_url: book.cover_url,
       category_id: book.category_id,
       status: book.status ?? "backlog",
       progress: book.status === "finished" ? 1 : 0,
@@ -30,11 +35,7 @@ export default async function LibraryPage() {
     })) ?? [];
 
   return (
-    <TabShell
-      title="本一覧"
-      eyebrow="TRACE"
-      headerAction={<AddBookButton />}
-    >
+    <TabShell title="本一覧" eyebrow="TRACE" headerAction={<AddBookButton />}>
       <div className="space-y-3">
         <p className="text-[13px] leading-relaxed text-white/65">
           読んできた本、読んでいる本、これから読む本。あなたの人生に積み上がる記録です。

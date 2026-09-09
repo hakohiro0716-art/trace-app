@@ -52,7 +52,7 @@ export function BookListCard(props: { book: any }) {
                 "bg-[linear-gradient(180deg,#f5f1e8_0%,#efe8dc_45%,#e7dfd2_100%)]",
               )}
             >
-              <div className="absolute left-2 top-2 right-2">
+              <div className="absolute left-2 right-2 top-2">
                 <p className="line-clamp-3 text-[8px] font-semibold leading-tight text-slate-900">
                   {book.title}
                 </p>
@@ -67,7 +67,6 @@ export function BookListCard(props: { book: any }) {
               <p className="truncate text-[15px] font-semibold tracking-[-0.01em]">
                 {book.title}
               </p>
-
               <p className="mt-1 truncate text-[12px] text-white/55">
                 {book.author}
               </p>
@@ -80,10 +79,6 @@ export function BookListCard(props: { book: any }) {
 
           <p className="mt-2 text-[11px] text-white/45">
             {categoryLabel[book.category_id] ?? "未分類"}
-          </p>
-
-          <p className="mt-2 text-[10px] text-red-400 break-all">
-            {book.cover_url ?? "cover_urlなし"}
           </p>
         </div>
       </div>
