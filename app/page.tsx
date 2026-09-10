@@ -112,6 +112,30 @@ export default async function Home() {
       };
     }) ?? [];
 
+  const recentFinishedBooks = allBooks
+    .filter(
+      (book) =>
+        book.status === "finished" &&
+        Boolean(book.finished_at),
+    )
+    .sort((a, b) => {
+      const aTime = new Date(
+        a.finished_at,
+      ).getTime();
+
+      const bTime = new Date(
+        b.finished_at,
+      ).getTime();
+
+      return bTime - aTime;
+    })
+    .slice(0, 3)
+    .map((book) => ({
+      id: String(book.id),
+      title: book.title ?? "",
+      coverUrl: book.cover_url ?? null,
+    }));
+
   return (
     <div className="min-h-screen">
       <div className="relative">
@@ -158,7 +182,11 @@ export default async function Home() {
             thoughtLogCount={thoughtLogCount}
           />
 
-          <LifeStackBanner />
+          <LifeStackBanner
+            finishedCount={finishedCount}
+            thoughtLogCount={thoughtLogCount}
+            recentBooks={recentFinishedBooks}
+          />
         </div>
       </div>
 

@@ -2,15 +2,67 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+
 import { supabase } from "@/app/lib/supabase";
 import { FormSection } from "@/app/components/memo/FormSection";
+
 import { CategoryPicker } from "./CategoryPicker";
 import { CoverUploadArea } from "./CoverUploadArea";
 import { FormTextArea, FormTextField } from "./FormField";
 import { RatingPicker } from "./RatingPicker";
 import { SaveBookButton } from "./SaveBookButton";
 import { StatusPicker } from "./StatusPicker";
+
 import type { BookDraft } from "@/app/lib/book-form";
+
+function getBookCoverStoragePath(
+  publicUrl: string | null,
+): string | null {
+  if (!publicUrl) {
+    return null;
+  }
+
+  const marker =
+    "/storage/v1/object/public/book-covers/";
+
+  const markerIndex = publicUrl.indexOf(marker);
+
+  if (markerIndex === -1) {
+    return null;
+  }
+
+  const encodedPath = publicUrl.slice(
+    markerIndex + marker.length,
+  );
+
+  try {
+    return decodeURIComponent(encodedPath);
+  } catch {
+    return encodedPath;
+  }
+}
+
+async function deleteCoverFromStorage(
+  coverUrl: string | null,
+) {
+  const storagePath =
+    getBookCoverStoragePath(coverUrl);
+
+  if (!storagePath) {
+    return;
+  }
+
+  const { error } = await supabase.storage
+    .from("book-covers")
+    .remove([storagePath]);
+
+  if (error) {
+    console.error(
+      "表紙画像の削除に失敗しました:",
+      error,
+    );
+  }
+}
 
 export function EditBookForm({
   bookId,
@@ -21,13 +73,16 @@ export function EditBookForm({
 }) {
   const router = useRouter();
 
-  const [draft, setDraft] = useState<BookDraft>(initialDraft);
+  const [draft, setDraft] =
+    useState<BookDraft>(initialDraft);
 
-  const [coverPreview, setCoverPreview] = useState<string | null>(
-    initialDraft.coverUrl,
-  );
+  const [coverPreview, setCoverPreview] =
+    useState<string | null>(
+      initialDraft.coverUrl,
+    );
 
-  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverFile, setCoverFile] =
+    useState<File | null>(null);
 
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -39,25 +94,48 @@ export function EditBookForm({
     !deleting;
 
   const handleSave = async () => {
-    if (!canSave) return;
+    if (!canSave) {
+      return;
+    }
 
     setSaving(true);
 
+    let newlyUploadedPath: string | null = null;
+
     try {
-      let coverUrl = draft.coverUrl;
+      const oldCoverUrl = draft.coverUrl;
+
+      let coverUrl = oldCoverUrl;
 
       if (coverFile) {
-        const fileName = `${Date.now()}-${coverFile.name}`;
+        const safeFileName =
+          coverFile.name.replace(
+            /[^a-zA-Z0-9._-]/g,
+            "_",
+          );
 
-        const { error: uploadError } = await supabase.storage
-          .from("book-covers")
-          .upload(fileName, coverFile);
+        const fileName =
+          `${Date.now()}-${safeFileName}`;
+
+        const { error: uploadError } =
+          await supabase.storage
+            .from("book-covers")
+            .upload(fileName, coverFile);
 
         if (uploadError) {
-          console.error(uploadError);
-          alert("画像アップロードに失敗しました");
+          console.error(
+            "画像アップロードに失敗しました:",
+            uploadError,
+          );
+
+          alert(
+            "画像アップロードに失敗しました",
+          );
+
           return;
         }
+
+        newlyUploadedPath = fileName;
 
         const { data } = supabase.storage
           .from("book-covers")
@@ -66,25 +144,49 @@ export function EditBookForm({
         coverUrl = data.publicUrl;
       }
 
-      const { error } = await supabase
-        .from("books")
-        .update({
-          title: draft.title.trim(),
-          author: draft.author.trim(),
-          status: draft.status,
-          rating: draft.rating,
-          memo: draft.note,
-          category_id: draft.categoryId,
-          started_at: draft.startedAt || null,
-          finished_at: draft.finishedAt || null,
-          cover_url: coverUrl,
-        })
-        .eq("id", bookId);
+      const { error: updateError } =
+        await supabase
+          .from("books")
+          .update({
+            title: draft.title.trim(),
+            author: draft.author.trim(),
+            status: draft.status,
+            rating: draft.rating,
+            memo: draft.note,
+            category_id: draft.categoryId,
+            started_at:
+              draft.startedAt || null,
+            finished_at:
+              draft.finishedAt || null,
+            cover_url: coverUrl,
+          })
+          .eq("id", bookId);
 
-      if (error) {
-        console.error(error);
+      if (updateError) {
+        console.error(
+          "本の更新に失敗しました:",
+          updateError,
+        );
+
+        if (newlyUploadedPath) {
+          await supabase.storage
+            .from("book-covers")
+            .remove([newlyUploadedPath]);
+        }
+
         alert("本の更新に失敗しました");
+
         return;
+      }
+
+      if (
+        coverFile &&
+        oldCoverUrl &&
+        oldCoverUrl !== coverUrl
+      ) {
+        await deleteCoverFromStorage(
+          oldCoverUrl,
+        );
       }
 
       router.push(`/books/${bookId}`);
@@ -106,15 +208,29 @@ export function EditBookForm({
     setDeleting(true);
 
     try {
-      const { error } = await supabase
-        .from("books")
-        .delete()
-        .eq("id", bookId);
+      const coverUrl = draft.coverUrl;
 
-      if (error) {
-        console.error(error);
+      const { error: deleteError } =
+        await supabase
+          .from("books")
+          .delete()
+          .eq("id", bookId);
+
+      if (deleteError) {
+        console.error(
+          "本の削除に失敗しました:",
+          deleteError,
+        );
+
         alert("本の削除に失敗しました");
+
         return;
+      }
+
+      if (coverUrl) {
+        await deleteCoverFromStorage(
+          coverUrl,
+        );
       }
 
       router.push("/library");
@@ -248,7 +364,9 @@ export function EditBookForm({
             disabled={saving || deleting}
             className="flex h-12 w-full items-center justify-center rounded-[18px] border border-red-400/20 bg-red-400/[0.08] text-[14px] font-medium text-red-200 transition-transform duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {deleting ? "削除中..." : "この本を削除"}
+            {deleting
+              ? "削除中..."
+              : "この本を削除"}
           </button>
 
           <p className="mt-2 text-center text-[11px] text-white/35">

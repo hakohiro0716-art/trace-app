@@ -3,19 +3,44 @@ import { TabShell } from "@/app/components/layout/TabShell";
 import { supabase } from "@/app/lib/supabase";
 
 export default async function ProfilePage() {
-  const { count: finishedCount, error } = await supabase
+  const { data: finishedBooks, error } = await supabase
     .from("books")
-    .select("*", {
-      count: "exact",
-      head: true,
-    })
+    .select("id, finished_at")
     .eq("status", "finished");
 
   if (error) {
-    console.error("読了冊数の取得に失敗しました:", error);
+    console.error(
+      "プロフィール用の読了データ取得に失敗しました:",
+      error,
+    );
   }
 
-  const totalFinished = finishedCount ?? 0;
+  const books = finishedBooks ?? [];
+
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth();
+
+  const totalFinished = books.length;
+
+  const thisYearFinished = books.filter((book) => {
+    if (!book.finished_at) return false;
+
+    const date = new Date(book.finished_at);
+
+    return date.getFullYear() === currentYear;
+  }).length;
+
+  const thisMonthFinished = books.filter((book) => {
+    if (!book.finished_at) return false;
+
+    const date = new Date(book.finished_at);
+
+    return (
+      date.getFullYear() === currentYear &&
+      date.getMonth() === currentMonth
+    );
+  }).length;
 
   return (
     <TabShell title="Profile" eyebrow="TRACE">
@@ -38,29 +63,35 @@ export default async function ProfilePage() {
 
         <div className="rounded-[var(--trace-radius)] border border-white/10 bg-white/[0.06] p-5 backdrop-blur-2xl">
           <p className="text-[11px] tracking-[0.22em] text-white/55">
-            STREAK
+            READING
           </p>
 
           <div className="mt-4 grid grid-cols-3 gap-3">
-            <div className="rounded-[22px] border border-white/10 bg-white/[0.05] p-4">
+            <Link
+              href="/library?status=finished"
+              className="rounded-[22px] border border-white/10 bg-white/[0.05] p-4 transition-transform duration-200 active:scale-[0.97]"
+            >
               <p className="text-[12px] text-white/50">
-                連続
+                今月読了
               </p>
 
               <p className="mt-2 text-[16px] font-semibold tracking-[-0.01em]">
-                6日
+                {thisMonthFinished}冊
               </p>
-            </div>
+            </Link>
 
-            <div className="rounded-[22px] border border-white/10 bg-white/[0.05] p-4">
+            <Link
+              href="/library?status=finished"
+              className="rounded-[22px] border border-white/10 bg-white/[0.05] p-4 transition-transform duration-200 active:scale-[0.97]"
+            >
               <p className="text-[12px] text-white/50">
-                今月
+                今年読了
               </p>
 
               <p className="mt-2 text-[16px] font-semibold tracking-[-0.01em]">
-                12.5h
+                {thisYearFinished}冊
               </p>
-            </div>
+            </Link>
 
             <Link
               href="/library?status=finished"

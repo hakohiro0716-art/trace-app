@@ -1,5 +1,11 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
+
 import { HeroBackground } from "@/app/components/home/HeroBackground";
+import {
+  ThoughtLogListItem,
+  type ThoughtLogListData,
+} from "@/app/components/memo/ThoughtLogListItem";
 import { BackHeader } from "@/app/components/navigation/BackHeader";
 import { supabase } from "@/app/lib/supabase";
 
@@ -31,15 +37,48 @@ export default async function BookDetailPage({
 }) {
   const { id } = await params;
 
-  const { data: book, error } = await supabase
-    .from("books")
-    .select("*")
-    .eq("id", id)
-    .single();
+  const [bookResult, thoughtLogsResult] = await Promise.all([
+    supabase
+      .from("books")
+      .select("*")
+      .eq("id", id)
+      .single(),
 
-  if (error || !book) {
+    supabase
+      .from("thought_logs")
+      .select(`
+        id,
+        title,
+        content,
+        tags,
+        created_at
+      `)
+      .eq("book_id", id)
+      .order("created_at", { ascending: false }),
+  ]);
+
+  const book = bookResult.data;
+
+  if (bookResult.error || !book) {
     notFound();
   }
+
+  if (thoughtLogsResult.error) {
+    console.error(
+      "この本の思考ログ取得に失敗しました:",
+      thoughtLogsResult.error,
+    );
+  }
+
+  const thoughtLogs: ThoughtLogListData[] =
+    thoughtLogsResult.data?.map((log) => ({
+      id: String(log.id),
+      title: log.title ?? "",
+      content: log.content ?? "",
+      tags: log.tags ?? [],
+      createdAt: log.created_at,
+      bookTitle: book.title,
+    })) ?? [];
 
   return (
     <div className="min-h-screen">
@@ -106,7 +145,8 @@ export default async function BookDetailPage({
 
                   <p className="mt-2 text-[20px] tracking-[0.12em] text-amber-200">
                     {book.rating
-                      ? "★".repeat(book.rating) + "☆".repeat(5 - book.rating)
+                      ? "★".repeat(book.rating) +
+                        "☆".repeat(5 - book.rating)
                       : "未評価"}
                   </p>
                 </div>
@@ -133,6 +173,43 @@ export default async function BookDetailPage({
                   <p className="mt-2 whitespace-pre-wrap text-[13px] leading-relaxed text-white/80">
                     {book.memo || "メモはまだありません"}
                   </p>
+                </div>
+
+                <div className="rounded-[22px] border border-white/10 bg-white/[0.06] p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-[11px] tracking-[0.18em] text-white/40">
+                        THOUGHT LOG
+                      </p>
+
+                      <p className="mt-1 text-[14px] font-semibold text-white/90">
+                        この本から生まれた思考
+                      </p>
+                    </div>
+
+                    <Link
+                      href={`/memo/new?bookId=${id}`}
+                      className="shrink-0 rounded-full border border-white/10 bg-white/[0.07] px-3 py-1.5 text-[11px] text-white/70"
+                    >
+                      ＋ 追加
+                    </Link>
+                  </div>
+
+                  <div className="mt-4 space-y-2">
+                    {thoughtLogs.length > 0 ? (
+                      thoughtLogs.map((log) => (
+                        <ThoughtLogListItem
+                          key={log.id}
+                          log={log}
+                          variant="dark"
+                        />
+                      ))
+                    ) : (
+                      <p className="py-3 text-[12px] leading-relaxed text-white/40">
+                        この本の思考ログはまだありません。
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
 
